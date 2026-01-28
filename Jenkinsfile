@@ -1,21 +1,34 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven-3.9.12'
-    }
-
     stages {
+
         stage('Build') {
+            when {
+                branch 'main'
+            }
             steps {
-                echo 'Building the project'
-                bat 'mvn clean compile'
+                echo 'Running full CI pipeline on main branch'
+                bat 'mvn clean test'
             }
         }
 
-        stage('Test') {
+        stage('Feature Branch Tests') {
+            when {
+                expression { env.BRANCH_NAME.startsWith('feature/') }
+            }
             steps {
-                echo 'Running tests'
+                echo 'Running tests only for feature branch'
+                bat 'mvn test'
+            }
+        }
+
+        stage('Release Validation') {
+            when {
+                expression { env.BRANCH_NAME.startsWith('release/') }
+            }
+            steps {
+                echo 'Running tests and security checks for release branch'
                 bat 'mvn test'
             }
         }
@@ -23,10 +36,10 @@ pipeline {
 
     post {
         success {
-            echo 'Build and tests successful'
+            echo 'Pipeline completed successfully'
         }
         failure {
-            echo 'Build or tests failed'
+            echo 'Pipeline failed'
         }
     }
 }
