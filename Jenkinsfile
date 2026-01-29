@@ -8,38 +8,37 @@ pipeline {
                 branch 'main'
             }
             steps {
-                echo 'Running full CI pipeline on main branch'
-                bat 'mvn clean test'
+                echo "Running full build on MAIN branch"
+                bat '"C:\\Users\\Sarah Sohaib\\Downloads\\setups\\apache-maven-3.9.12-bin\\apache-maven-3.9.12\\bin\\mvn.cmd" clean compile'
             }
         }
 
-        stage('Feature Branch Tests') {
-            when {
-                expression { env.BRANCH_NAME.startsWith('feature/') }
-            }
+        stage('Test') {
             steps {
-                echo 'Running tests only for feature branch'
-                bat 'mvn test'
+                echo "Running tests"
+                bat '"C:\\Users\\Sarah Sohaib\\Downloads\\setups\\apache-maven-3.9.12-bin\\apache-maven-3.9.12\\bin\\mvn.cmd" test'
             }
         }
 
-        stage('Release Validation') {
+        stage('Security Scan (Release only)') {
             when {
-                expression { env.BRANCH_NAME.startsWith('release/') }
+                expression {
+                    env.BRANCH_NAME.startsWith("release/")
+                }
             }
             steps {
-                echo 'Running tests and security checks for release branch'
-                bat 'mvn test'
+                echo "Running security checks for RELEASE branch"
+                echo "Simulated security scan completed"
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully'
+            echo "Pipeline completed successfully for ${env.BRANCH_NAME}"
         }
         failure {
-            echo 'Pipeline failed'
+            echo "Pipeline failed for ${env.BRANCH_NAME}"
         }
     }
 }
